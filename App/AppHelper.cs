@@ -33,16 +33,12 @@ namespace App
                     MessageBox.Show(message);
                 }
             }
-            catch(JsonException ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
 
-            return null;
+            throw new HttpRequestException("Failed To Get Data From API");
             
         }
     }
@@ -50,6 +46,7 @@ namespace App
     public class Variables
     {
         public static readonly HttpClient client = new HttpClient() { Timeout = TimeSpan.FromSeconds(1000) };
+        public static string APIHostSite = "https://localhost:7121/";
     }
     
 }

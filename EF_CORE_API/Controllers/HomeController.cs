@@ -19,7 +19,7 @@ namespace EF_CORE_API.Controllers
             {
                 var customer = await _db.CustomersListHs
                .AsNoTracking()
-               .Where(e => e.CustomerNo.StartsWith("R"))
+               .Where(e => e.SalesMan == "مبيعات مازن محفوظ-مشاريع الخبر")
                .Select(e => new
                {
                    e.CustomerNo,

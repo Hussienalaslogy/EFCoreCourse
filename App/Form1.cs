@@ -11,7 +11,7 @@ namespace App
             InitializeComponent();
         }
 
-        private async void Form1_Load(object sender, EventArgs e)
+        private void Form1_Load(object sender, EventArgs e)
         {
            
             
@@ -20,7 +20,7 @@ namespace App
 
         private async void view_Btn_Click(object sender, EventArgs e)
         {
-            string apiUrl = "https://localhost:7121/GetCustomer";
+            string apiUrl = $"{Variables.APIHostSite}GetCustomer";
             var response = await Methods.SendGetRequest(apiUrl);
             if(response != null)
             {
@@ -42,8 +42,8 @@ namespace App
         
         public class Customer
         {
-            public string CustomerNo { get; set; }
-            public string CustomerName { get; set; }
+            public string? CustomerNo { get; set; }
+            public string? CustomerName { get; set; }
         }
 
 

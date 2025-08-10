@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             groupBox1 = new GroupBox();
-            DGV_View = new DataGridView();
             view_Btn = new Button();
+            DGV_View = new DataGridView();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)DGV_View).BeginInit();
             SuspendLayout();
@@ -39,37 +39,43 @@
             // 
             groupBox1.Controls.Add(view_Btn);
             groupBox1.Controls.Add(DGV_View);
-            groupBox1.Location = new Point(12, 12);
+            groupBox1.Location = new Point(14, 16);
+            groupBox1.Margin = new Padding(3, 4, 3, 4);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(239, 202);
+            groupBox1.Padding = new Padding(3, 4, 3, 4);
+            groupBox1.Size = new Size(331, 269);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
             groupBox1.Text = "View";
             // 
-            // DGV_View
-            // 
-            DGV_View.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            DGV_View.Location = new Point(6, 22);
-            DGV_View.Name = "DGV_View";
-            DGV_View.Size = new Size(227, 144);
-            DGV_View.TabIndex = 1;
-            // 
             // view_Btn
             // 
-            view_Btn.Location = new Point(69, 172);
+            view_Btn.Location = new Point(108, 229);
+            view_Btn.Margin = new Padding(3, 4, 3, 4);
             view_Btn.Name = "view_Btn";
-            view_Btn.Size = new Size(75, 23);
+            view_Btn.Size = new Size(86, 31);
             view_Btn.TabIndex = 1;
             view_Btn.Text = "View";
             view_Btn.UseVisualStyleBackColor = true;
             view_Btn.Click += view_Btn_Click;
             // 
+            // DGV_View
+            // 
+            DGV_View.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            DGV_View.Location = new Point(7, 29);
+            DGV_View.Margin = new Padding(3, 4, 3, 4);
+            DGV_View.Name = "DGV_View";
+            DGV_View.RowHeadersWidth = 51;
+            DGV_View.Size = new Size(311, 192);
+            DGV_View.TabIndex = 1;
+            // 
             // Form1
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(914, 600);
             Controls.Add(groupBox1);
+            Margin = new Padding(3, 4, 3, 4);
             Name = "Form1";
             Text = "Form1";
             Load += Form1_Load;
