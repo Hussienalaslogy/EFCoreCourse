@@ -10,36 +10,23 @@ namespace App
 {
     public static class Methods
     {
-        public static async Task<HttpResponseMessage> SendGetRequest(string apiUrl)
+        public static async Task<HttpResponseMessage> SendGetRequest(string apiUrl , CancellationToken token)
         {
             try
             {
                 using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
-
-
-                HttpResponseMessage response = await Variables.client.SendAsync(request);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return response;
-                }
-                else
-                {
-                    string errorData = await response.Content.ReadAsStringAsync();
-
-                    string message = $"[{DateTime.Now}]--[Reuest Sent But Got Failed Response]--" +
-                                     $"[Failed Code:{response.StatusCode}]--[Details:{errorData}]";
-
-                    MessageBox.Show(message);
-                }
+                var response = await Variables.client.SendAsync(request,token);
+                response.EnsureSuccessStatusCode();
+                return response;
             }
-            catch (Exception ex)
+            catch (OperationCanceledException)
             {
-                MessageBox.Show(ex.Message);
+                return null;
             }
-
-            throw new HttpRequestException("Failed To Get Data From API");
-            
+            catch (Exception ex) 
+            {
+                throw new HttpRequestException($"Failed To Get Data From API :{ex.Message} ");
+            }
         }
     }
 

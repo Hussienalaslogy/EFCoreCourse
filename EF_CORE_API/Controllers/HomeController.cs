@@ -30,11 +30,11 @@ namespace EF_CORE_API.Controllers
                 if (!customer.Any()) { return NotFound(); }
 
                 return Ok(customer);
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-           
         }
     }
 }
