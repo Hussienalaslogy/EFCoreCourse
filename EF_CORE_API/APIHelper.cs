@@ -34,12 +34,29 @@ namespace EF_CORE_API.Models
                 .HasPrincipalKey(item => item.ItemNo)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //forign Key Between Customer And Adress
+            modelBuilder.Entity<CustomersListH>()
+                .HasOne(customer => customer.Adress)
+                .WithOne(adress => adress.Customer)
+                .HasForeignKey<CustomersAdresses>(adress => adress.CustomerNo) 
+                .HasPrincipalKey<CustomersListH>(customer => customer.CustomerNo)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //PK For Customer List
+            modelBuilder.Entity<CustomersListH>(entity =>
+            {
+                entity.HasKey(e => e.CustomerNo);
+            });
         }
     }
 
     public static class Credintials
     {
-        //Case Online
         public static string? connectionString = Environment.GetEnvironmentVariable("DynamicsDb");
     }
+
+   
+
 }

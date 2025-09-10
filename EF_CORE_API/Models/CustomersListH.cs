@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace EF_CORE_API.Models;
 
 public partial class CustomersListH
 {
+    
     public string CustomerNo { get; set; } = null!;
 
     public string CustomerName { get; set; } = null!;
@@ -32,4 +34,5 @@ public partial class CustomersListH
     public string? Status { get; set; }
 
     public virtual ICollection<SalesOrderHead> SalesOrderHeads { get; set; } = new List<SalesOrderHead>();
+    public virtual CustomersAdresses? Adress { get; set; }
 }
