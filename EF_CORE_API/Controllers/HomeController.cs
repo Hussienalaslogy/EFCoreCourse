@@ -12,13 +12,46 @@ namespace EF_CORE_API.Controllers
             _db = db;
         }
         
-        [HttpPost("Temp")]
+        [HttpPost("TempPost")]
         public async Task<IActionResult> Temp([FromBody] CustomersAdresses customersAdresses)
         {
             await _db.AddAsync(customersAdresses);
             _db.SaveChanges();
             return Ok();
         }
+        
+        [HttpGet("TempGet")]
+        public async Task<IActionResult> TempGet(string param)
+        {
+            var docList = await _db.CustomersListH
+                .Where(e => e.CustomerNo == param)
+                .Select(e => e.SalesOrderHeads.Where(o => o.Type == "Sales Order"))
+                .SelectMany(e => e)
+                .Select( e => new
+                {
+                    e.DocumentNo,
+                    e.Total
+                })
+                .ToListAsync();
+
+            var docList2 = await _db.CustomersListH
+               .Where(e => e.CustomerNo == param)
+               .SelectMany(e => e.SalesOrderHeads)
+               .Where(e => e.Type == "Sales Order")
+               .Select(e => new
+               {
+                   e.DocumentNo,
+                   e.Total
+               })
+               .ToListAsync();
+
+            return Ok(docList2);
+        }
+
+
+
+
+
 
         [HttpGet("GetCustomer")]
         public async Task<IActionResult> GetCustomer(string param)
@@ -34,7 +67,8 @@ namespace EF_CORE_API.Controllers
                    e.CustomerName,
                    e.CustomerEname,
                    e.SalesMan,
-                   e.MobileNo
+                   e.MobileNo,
+                   e.Adress
                })
                .ToListAsync();
 

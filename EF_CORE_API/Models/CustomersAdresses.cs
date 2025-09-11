@@ -12,6 +12,5 @@ namespace EF_CORE_API.Models
         public string? City { get; set; }
         public string? ZipCode { get; set; }
         public virtual CustomersListH? Customer { get; set; }
-
     }
 }

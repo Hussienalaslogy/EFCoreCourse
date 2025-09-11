@@ -15,9 +15,7 @@ public partial class SmarterASPContext : DbContext
     {
     }
 
-    //=============================================================================
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-    //=============================================================================
+    //-------------------------------------------------------------------------
     public virtual DbSet<CustomersListH> CustomersListH { get; set; }
 
     public virtual DbSet<CustomersAdresses> CustomersAdresses { get; set; }
@@ -29,8 +27,10 @@ public partial class SmarterASPContext : DbContext
     public virtual DbSet<SalesOrderLinesItem> SalesOrderLinesItem { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+    
 
-    //==============================================================================
+    //------------------------------------------------------------------------
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         OnModelCreatingPartial(modelBuilder);

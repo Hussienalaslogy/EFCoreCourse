@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -432,13 +433,20 @@ namespace App
         {
             var adress = new
             {
-                CustomerNo = "R00000001",
-                BuildingNo = "125"
+                CustomerNo = "R00000002",
+                BuildingNo = "125",
+                Street = "Ibn Warqaa",
+                District = "Manfuha",
+                City = "Riyadh",
+                ZipCode = "18958"
+
             };
-            string apiUrl = $"{Variables.APIHostSite}Temp";
+            string adressJson = JsonConvert.SerializeObject(adress);
+            
+            string apiUrl = $"{Variables.APIHostSite}TempPost";
 
             using var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
-            request.Content = new StringContent(apiUrl, Encoding.UTF8, "application/json");
+            request.Content = new StringContent(adressJson, Encoding.UTF8, "application/json");
             using var response = await Variables.client.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
@@ -452,10 +460,28 @@ namespace App
                 MessageBox.Show(msg);
             }
         }
+        private async Task GetTemp()
+        {
+            string apiUrl = $"{Variables.APIHostSite}TempGet?param=K00001377";
+            using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
+            using var response = await Variables.client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                string errorData = $"{response.StatusCode} - {response.Content.ReadAsStringAsync()}";
+            }
+        }
+
+        
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            await SendTemp();
+            //await SendTemp();
+            await GetTemp();
         }
     }
 }
