@@ -57,6 +57,24 @@ namespace EF_CORE_API.Models
         public static string? connectionString = Environment.GetEnvironmentVariable("DynamicsDb");
     }
 
+    public class DTOs
+    {
+        public class LinesItems
+        {
+            public string VendorNo { get; set; }
+            public string ItemDescription { get; set; }
+            public decimal Quantity { get; set; }
+            public decimal UnitPrice { get; set; }
+            public int SoHeadId { get; set; }
+            public SalesOrderHead SalesOrdersHead { get; set; }
+        }
+    }
+
+    
+
+   
+    
+
    
 
 }

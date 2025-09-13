@@ -1,6 +1,8 @@
 ﻿using EF_CORE_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.Json;
+using Newtonsoft.Json;
 
 namespace EF_CORE_API.Controllers
 {
@@ -21,31 +23,39 @@ namespace EF_CORE_API.Controllers
         }
         
         [HttpGet("TempGet")]
-        public async Task<IActionResult> TempGet(string param)
+        public async Task<IActionResult> TempGet(DateTime start , DateTime end)
         {
-            var docList = await _db.CustomersListH
-                .Where(e => e.CustomerNo == param)
-                .Select(e => e.SalesOrderHeads.Where(o => o.Type == "Sales Order"))
-                .SelectMany(e => e)
-                .Select( e => new
+            //SoldQtyPerItemAscount
+            var grouppedData = await PrepareLinesItems(start, end);
+            var result =  grouppedData
+                .GroupBy(e => new { e.VendorNo, e.ItemDescription, e.UnitPrice })
+                .Select(g => new
                 {
-                    e.DocumentNo,
-                    e.Total
+                    g.Key.VendorNo,
+                    g.Key.ItemDescription,
+                    g.Key.UnitPrice,
+                    TotalQty = g.Sum(x => x.Quantity)
                 })
-                .ToListAsync();
+                .OrderByDescending(e => e.TotalQty)
+                .ToList();
 
-            var docList2 = await _db.CustomersListH
-               .Where(e => e.CustomerNo == param)
-               .SelectMany(e => e.SalesOrderHeads)
-               .Where(e => e.Type == "Sales Order")
-               .Select(e => new
-               {
-                   e.DocumentNo,
-                   e.Total
-               })
-               .ToListAsync();
 
-            return Ok(docList2);
+            //SoldQtyPerItemAscount
+            var result2 = grouppedData
+                .GroupBy(e => new { e.VendorNo, e.ItemDescription, e.UnitPrice })
+                .Select(g => new
+                {
+                    g.Key.VendorNo,
+                    g.Key.ItemDescription,
+                    g.Key.UnitPrice,
+                    countQty = g.DistinctBy(e => e.SoHeadId).Count()
+                })
+                .OrderByDescending(e => e.countQty)
+                .ToList();
+
+            var resultFinal = JsonConvert.SerializeObject(result, Newtonsoft.Json.Formatting.Indented);
+
+            return Ok(resultFinal);
         }
 
 
@@ -218,5 +228,29 @@ namespace EF_CORE_API.Controllers
                 return Ok(end + 1);
             }
         }
+
+
+        public async Task<List<DTOs.LinesItems>> PrepareLinesItems(DateTime start, DateTime end)
+        {
+            var result = await _db.SalesOrderLinesItem
+               .AsNoTracking()
+               .Where(e => e.SoHead.Type == "Sales Order")
+               .Where(e => e.SoHead.Date > start && e.SoHead.Date <= end)
+               .Select(g => new DTOs.LinesItems
+               {
+                   VendorNo = g.VendorNo,
+                   ItemDescription = g.ItemDescription,
+                   Quantity = g.Quantity,
+                   UnitPrice = g.UnitPrice,
+                   SoHeadId = g.SoHeadId,
+                   SalesOrdersHead = g.SoHead
+               })
+               .ToListAsync();
+
+            return result;
+        }
+
+
+
     }
 }

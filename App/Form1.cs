@@ -462,7 +462,11 @@ namespace App
         }
         private async Task GetTemp()
         {
-            string apiUrl = $"{Variables.APIHostSite}TempGet?param=K00001377";
+            var now = DateTime.Now;
+            var start = new DateTime(now.Year, now.Month, 1).AddMonths(-5);
+            var end = start.AddMonths(2);
+
+            string apiUrl = $"{Variables.APIHostSite}TempGet?start={start}&&end={end}";
             using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
             using var response = await Variables.client.SendAsync(request);
 
