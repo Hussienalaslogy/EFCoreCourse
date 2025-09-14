@@ -1,4 +1,5 @@
 ﻿using EF_CORE_API.Models;
+using EF_CORE_API.Models2;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.Json;
@@ -9,9 +10,11 @@ namespace EF_CORE_API.Controllers
     public class HomeController : Controller
     {
         private readonly SmarterASPContext _db;
-        public HomeController(SmarterASPContext db)
+        private readonly SmarterASPContext2 _db2;
+        public HomeController(SmarterASPContext db , SmarterASPContext2 db2)
         {
             _db = db;
+            _db2 = db2;
         }
         
         [HttpPost("TempPost")]
@@ -25,15 +28,16 @@ namespace EF_CORE_API.Controllers
         [HttpGet("TempGet")]
         public async Task<IActionResult> TempGet(DateTime start , DateTime end)
         {
+
             //SoldQtyPerItemAscount
-            var grouppedData = await PrepareLinesItems(start, end);
-            var result =  grouppedData
-                .GroupBy(e => new { e.VendorNo, e.ItemDescription, e.UnitPrice })
+            var rawData = await PrepareLinesItems(start, end);
+            var result = rawData
+                .GroupBy(e => new { e.VendorNo })
                 .Select(g => new
                 {
                     g.Key.VendorNo,
-                    g.Key.ItemDescription,
-                    g.Key.UnitPrice,
+                    Discrebtion = g.FirstOrDefault()?.ItemDescription,
+                    Unitprice = g.FirstOrDefault()?.UnitPrice,
                     TotalQty = g.Sum(x => x.Quantity)
                 })
                 .OrderByDescending(e => e.TotalQty)
@@ -41,17 +45,44 @@ namespace EF_CORE_API.Controllers
 
 
             //SoldQtyPerItemAscount
-            var result2 = grouppedData
-                .GroupBy(e => new { e.VendorNo, e.ItemDescription, e.UnitPrice })
+            var result2 = rawData
+                .GroupBy(e => new { e.VendorNo })
                 .Select(g => new
                 {
                     g.Key.VendorNo,
-                    g.Key.ItemDescription,
-                    g.Key.UnitPrice,
+                    Discrebtion = g.FirstOrDefault()?.ItemDescription,
+                    Unitprice = g.FirstOrDefault()?.UnitPrice,
                     countQty = g.DistinctBy(e => e.SoHeadId).Count()
                 })
                 .OrderByDescending(e => e.countQty)
                 .ToList();
+
+            //General INfo 
+            var result3 = rawData
+                .GroupBy(e => new { e.VendorNo })
+                .Select(g => new
+                {
+                    g.Key.VendorNo,
+                    Discrebtion = g.FirstOrDefault()?.ItemDescription,
+                    Unitprice = g.FirstOrDefault()?.UnitPrice,
+                    SoldCount = g.Count()
+                })
+                .ToList();
+            var infos = new List<object>
+            {
+                new { item = "Items Sold"      , value = result3.Count() },
+                new { item = "Items Sold > 30" , value = result3.Count(e => e.SoldCount > 30) },
+                new { item = "Items Sold 21-30", value = result3.Count(e => e.SoldCount > 20 && e.SoldCount <= 30) },
+                new { item = "Items Sold 11-20", value = result3.Count(e => e.SoldCount > 10 && e.SoldCount <= 20) },
+                new { item = "Items Sold 06-10", value = result3.Count(e => e.SoldCount > 5 && e.SoldCount <= 10) },
+                new { item = "Items Sold 02-05", value = result3.Count(e => e.SoldCount > 1 && e.SoldCount <= 5) },
+                new { item = "Items Sold 1"    , value = result3.Count(e => e.SoldCount == 1 ) }
+            };
+
+            //
+
+            //var allData = await _db.SalesOrderLinesItem
+            //    .ToListAsync();
 
             var resultFinal = JsonConvert.SerializeObject(result, Newtonsoft.Json.Formatting.Indented);
 
@@ -99,7 +130,7 @@ namespace EF_CORE_API.Controllers
         }
 
         [HttpPost("AddCustomer")]
-        public async Task<IActionResult> AddCustomer([FromBody] CustomersListH customer)
+        public async Task<IActionResult> AddCustomer([FromBody] EF_CORE_API.Models.CustomersListH customer)
         {
             if (customer == null)
             {
@@ -125,7 +156,7 @@ namespace EF_CORE_API.Controllers
         }
 
         [HttpPut("UpdateCustomer")]
-        public async Task<IActionResult> UpdateCustomer([FromBody] CustomersListH customer , string customerNo)
+        public async Task<IActionResult> UpdateCustomer([FromBody] EF_CORE_API.Models.CustomersListH customer , string customerNo)
         {
             if (customer == null) return BadRequest("No Data ToUpdate");
 
@@ -232,18 +263,18 @@ namespace EF_CORE_API.Controllers
 
         public async Task<List<DTOs.LinesItems>> PrepareLinesItems(DateTime start, DateTime end)
         {
-            var result = await _db.SalesOrderLinesItem
+            var result = await _db2.SalesOrderLinesItems
                .AsNoTracking()
-               .Where(e => e.SoHead.Type == "Sales Order")
-               .Where(e => e.SoHead.Date > start && e.SoHead.Date <= end)
+               .Where(e => e.DocumentNoNavigation.Type == "Sales Order")
+               .Where(e => e.DocumentNoNavigation.Date > start && e.DocumentNoNavigation.Date <= end)
                .Select(g => new DTOs.LinesItems
                {
                    VendorNo = g.VendorNo,
                    ItemDescription = g.ItemDescription,
                    Quantity = g.Quantity,
                    UnitPrice = g.UnitPrice,
-                   SoHeadId = g.SoHeadId,
-                   SalesOrdersHead = g.SoHead
+                   SoHeadId = g.DocumentNo,
+                   SalesOrdersHead = g.DocumentNoNavigation
                })
                .ToListAsync();
 

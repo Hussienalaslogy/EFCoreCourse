@@ -55,6 +55,9 @@ namespace EF_CORE_API.Models
     public static class Credintials
     {
         public static string? connectionString = Environment.GetEnvironmentVariable("DynamicsDb");
+        public static string? connectionString2 = Environment.GetEnvironmentVariable("DynamicsDb2");
+
+
     }
 
     public class DTOs
@@ -65,8 +68,8 @@ namespace EF_CORE_API.Models
             public string ItemDescription { get; set; }
             public decimal Quantity { get; set; }
             public decimal UnitPrice { get; set; }
-            public int SoHeadId { get; set; }
-            public SalesOrderHead SalesOrdersHead { get; set; }
+            public string SoHeadId { get; set; }
+            public EF_CORE_API.Models2.SalesOrdersHead SalesOrdersHead { get; set; }
         }
     }
 

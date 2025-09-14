@@ -463,10 +463,10 @@ namespace App
         private async Task GetTemp()
         {
             var now = DateTime.Now;
-            var start = new DateTime(now.Year, now.Month, 1).AddMonths(-5);
-            var end = start.AddMonths(2);
+            var start = new DateTime(now.Year, now.Month, 1).AddMonths(-1);
+            var end = start.AddMonths(1);
 
-            string apiUrl = $"{Variables.APIHostSite}TempGet?start={start}&&end={end}";
+            string apiUrl = $"{Variables.APIHostSite}TempGet?start={start}&end={end}";
             using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
             using var response = await Variables.client.SendAsync(request);
 
