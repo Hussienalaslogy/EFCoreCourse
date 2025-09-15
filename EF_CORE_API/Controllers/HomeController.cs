@@ -25,68 +25,123 @@ namespace EF_CORE_API.Controllers
             return Ok();
         }
         
-        [HttpGet("TempGet")]
-        public async Task<IActionResult> TempGet(DateTime start , DateTime end)
+        [HttpGet("SalesSummary")]
+        public async Task<IActionResult> SalesSummary(DateTime start , DateTime end)
         {
-
-            //SoldQtyPerItemAscount
-            var rawData = await PrepareLinesItems(start, end);
-            var result = rawData
-                .GroupBy(e => new { e.VendorNo })
-                .Select(g => new
-                {
-                    g.Key.VendorNo,
-                    Discrebtion = g.FirstOrDefault()?.ItemDescription,
-                    Unitprice = g.FirstOrDefault()?.UnitPrice,
-                    TotalQty = g.Sum(x => x.Quantity)
-                })
-                .OrderByDescending(e => e.TotalQty)
-                .ToList();
-
-
-            //SoldQtyPerItemAscount
-            var result2 = rawData
-                .GroupBy(e => new { e.VendorNo })
-                .Select(g => new
-                {
-                    g.Key.VendorNo,
-                    Discrebtion = g.FirstOrDefault()?.ItemDescription,
-                    Unitprice = g.FirstOrDefault()?.UnitPrice,
-                    countQty = g.DistinctBy(e => e.SoHeadId).Count()
-                })
-                .OrderByDescending(e => e.countQty)
-                .ToList();
-
-            //General INfo 
-            var result3 = rawData
-                .GroupBy(e => new { e.VendorNo })
-                .Select(g => new
-                {
-                    g.Key.VendorNo,
-                    Discrebtion = g.FirstOrDefault()?.ItemDescription,
-                    Unitprice = g.FirstOrDefault()?.UnitPrice,
-                    SoldCount = g.Count()
-                })
-                .ToList();
-            var infos = new List<object>
+            try
             {
-                new { item = "Items Sold"      , value = result3.Count() },
-                new { item = "Items Sold > 30" , value = result3.Count(e => e.SoldCount > 30) },
-                new { item = "Items Sold 21-30", value = result3.Count(e => e.SoldCount > 20 && e.SoldCount <= 30) },
-                new { item = "Items Sold 11-20", value = result3.Count(e => e.SoldCount > 10 && e.SoldCount <= 20) },
-                new { item = "Items Sold 06-10", value = result3.Count(e => e.SoldCount > 5 && e.SoldCount <= 10) },
-                new { item = "Items Sold 02-05", value = result3.Count(e => e.SoldCount > 1 && e.SoldCount <= 5) },
-                new { item = "Items Sold 1"    , value = result3.Count(e => e.SoldCount == 1 ) }
-            };
+                //Sales Summary per SalesMan
+                var result = await _db2.SalesOrdersHeads
+                    .Where(e => e.Type == "Sales Order" && e.Date >= start && e.Date < end)
+                    .GroupBy(e => e.SalesMan)
+                    .Select(g => new
+                    {
+                        SalesMan = g.Key,
+                        OrdersCount = g.Count(),
+                        OrdersAmount = g.Sum(x => x.Total),
+                        TopOrderNo = g.OrderByDescending(x => x.Total).First().DocumentNo,
+                        TopOrderValue = g.Max(x => x.Total),
+                    })
+                    .ToListAsync();
 
-            //
+                var resultFinal = JsonConvert.SerializeObject(result, Newtonsoft.Json.Formatting.Indented);
 
-            //var allData = await _db.SalesOrderLinesItem
-            //    .ToListAsync();
+                return Ok(resultFinal);
 
-            var resultFinal = JsonConvert.SerializeObject(result, Newtonsoft.Json.Formatting.Indented);
+            }
+            catch (DbUpdateException ex)
+            {
+                string innerMsg = ex.InnerException?.Message ?? string.Empty;
+                string msg = string.IsNullOrEmpty(innerMsg) ? ex.Message : innerMsg;
+                return BadRequest($"EF Core Error: {msg}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An unexpected error occurred : {ex.Message}");
+            }
 
-            return Ok(resultFinal);
+
+            
+        }
+
+        [HttpGet("CustomerSummary")]
+        public async Task<IActionResult> CustomerSummary(DateTime start, DateTime end)
+        {
+            try
+            {
+                var result = await _db2.SalesOrdersHeads
+                    .Where(e => e.Type == "Sales Order" && e.Date >= start && e.Date < end)
+                    .GroupBy(e => e.CustomerId)
+                    .Select(g => new
+                    {
+                        CustomerName = g.First().CustomerEname,
+                        SalesMan = g.First().SalesMan,
+                        OrdersCount = g.Count(),
+                        OrdersAmount = g.Sum(x => x.Total),
+                        TopOrderNo = g.OrderByDescending(x => x.Total).First().DocumentNo,
+                        TopOrderValue = g.Max(x => x.Total),
+                    })
+                    .ToListAsync();
+
+                var resultFinal = JsonConvert.SerializeObject(result, Newtonsoft.Json.Formatting.Indented);
+
+                return Ok(resultFinal);
+
+            }
+            catch (DbUpdateException ex)
+            {
+                string innerMsg = ex.InnerException?.Message ?? string.Empty;
+                string msg = string.IsNullOrEmpty(innerMsg) ? ex.Message : innerMsg;
+                return BadRequest($"EF Core Error: {msg}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An unexpected error occurred : {ex.Message}");
+            }
+        }
+
+        [HttpGet("CustomerTires")]
+        public async Task<IActionResult> CustomerTires(DateTime start, DateTime end)
+        {
+            try
+            {
+                var result = await _db2.SalesOrdersHeads
+                                .Where(e => e.Type == "Sales Order" && e.Date >= start && e.Date < end)
+                                .GroupBy(e => e.CustomerId)
+                                 .Select(g => new
+                                 {
+                                     CustomerName = g.First().CustomerEname,
+                                     SalesMan = g.First().SalesMan,
+                                     OrdersAmount = g.Sum(x => x.Total),
+                                 })
+                                 .GroupBy(e => e.SalesMan)
+                                 .Select(g => new
+                                 {
+                                     SalesMan = g.Key,
+                                     CustomersCount = g.Count(),
+                                     Tier1 = g.Count(e => e.OrdersAmount < 1000),
+                                     Tier2 = g.Count(e => e.OrdersAmount > 999 && e.OrdersAmount <= 9999),
+                                     Tier3 = g.Count(e => e.OrdersAmount > 9999 && e.OrdersAmount <= 99999),
+                                     Tier4 = g.Count(e => e.OrdersAmount > 99999)
+
+                                 })
+                                 .ToListAsync();
+
+                var resultFinal = JsonConvert.SerializeObject(result, Newtonsoft.Json.Formatting.Indented);
+
+                return Ok(resultFinal);
+
+            }
+            catch (DbUpdateException ex)
+            {
+                string innerMsg = ex.InnerException?.Message ?? string.Empty;
+                string msg = string.IsNullOrEmpty(innerMsg) ? ex.Message : innerMsg;
+                return BadRequest($"EF Core Error: {msg}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An unexpected error occurred : {ex.Message}");
+            }
         }
 
 

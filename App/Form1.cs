@@ -466,7 +466,7 @@ namespace App
             var start = new DateTime(now.Year, now.Month, 1).AddMonths(-1);
             var end = start.AddMonths(1);
 
-            string apiUrl = $"{Variables.APIHostSite}TempGet?start={start}&end={end}";
+            string apiUrl = $"{Variables.APIHostSite}LinqTraining?start={start}&end={end}";
             using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
             using var response = await Variables.client.SendAsync(request);
 
