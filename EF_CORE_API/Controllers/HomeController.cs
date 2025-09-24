@@ -18,11 +18,70 @@ namespace EF_CORE_API.Controllers
         }
         
         [HttpPost("TempPost")]
-        public async Task<IActionResult> Temp([FromBody] CustomersAdresses customersAdresses)
+        public async Task<IActionResult> Temp([FromBody] EF_CORE_API.Models.SalesOrderHead salesOrders)
         {
-            await _db.AddAsync(customersAdresses);
-            _db.SaveChanges();
-            return Ok();
+            if (salesOrders == null)
+                return BadRequest("salesOrder is null");
+
+            try
+            {
+                var existingOrder = _db.SalesOrderHead
+                        .Include(e => e.SalesOrderLinesItems)
+                        .FirstOrDefault(e => e.DocumentNo == salesOrders.DocumentNo);
+
+                if (existingOrder == null)
+                {
+                    // مش موجود → نضيفه جديد
+                    _db.SalesOrderHead.Add(salesOrders);
+                }
+                else
+                {
+                    // موجود → نحدّث القيم الأساسية
+                    existingOrder.Type = salesOrders.Type;
+                    existingOrder.TypeId = salesOrders.TypeId;
+                    existingOrder.SalesMan = salesOrders.SalesMan;
+                    existingOrder.CustomerId = salesOrders.CustomerId;
+                    existingOrder.CustomerName = salesOrders.CustomerName;
+                    existingOrder.CustomerEname = salesOrders.CustomerEname;
+                    existingOrder.Date = salesOrders.Date;
+                    existingOrder.BatchId = salesOrders.BatchId;
+                    existingOrder.PoNo = salesOrders.PoNo;
+                    existingOrder.SiteId = salesOrders.SiteId;
+                    existingOrder.SubTotal = salesOrders.SubTotal;
+                    existingOrder.Discount = salesOrders.Discount;
+                    existingOrder.Freight = salesOrders.Freight;
+                    existingOrder.Tax = salesOrders.Tax;
+                    existingOrder.Total = salesOrders.Total;
+
+                    // نحذف الأصناف القديمة
+                    _db.SalesOrderLinesItem.RemoveRange(existingOrder.SalesOrderLinesItems);
+
+                    // نضيف الأصناف الجديدة
+                    foreach (var item in salesOrders.SalesOrderLinesItems)
+                    {
+                        existingOrder.SalesOrderLinesItems.Add(item);
+                    }
+
+
+                }
+
+                _db.SaveChanges();
+
+
+               
+                return Ok(new { message = "Order saved as JSON file successfully" });
+            }
+            catch (Exception ex)
+            {
+                string GetFullError(Exception e)
+                {
+                    if (e.InnerException == null) return e.Message;
+                    return e.Message + " --> " + GetFullError(e.InnerException);
+                }
+
+                var fullError = GetFullError(ex);
+                return StatusCode(500, $"Internal server error: {fullError}");
+            }
         }
         
         [HttpGet("SalesSummary")]
@@ -41,6 +100,18 @@ namespace EF_CORE_API.Controllers
                         OrdersAmount = g.Sum(x => x.Total),
                         TopOrderNo = g.OrderByDescending(x => x.Total).First().DocumentNo,
                         TopOrderValue = g.Max(x => x.Total),
+
+                        NewCustomers = _db2.SalesOrdersHeads
+                        .Where(o => o.Type == "Sales Order" && o.SalesMan == g.Key)
+                        .GroupBy(o => o.CustomerId)
+                        .Select(g => new
+                        {
+                            CustomerId = g.Key,
+                            ordersCountBeforeStart = g.Count(x => x.Date < start),
+                        })
+                        .Where(g => g.ordersCountBeforeStart == 0)
+                        .Count()
+
                     })
                     .ToListAsync();
 
@@ -82,6 +153,27 @@ namespace EF_CORE_API.Controllers
                         TopOrderValue = g.Max(x => x.Total),
                     })
                     .ToListAsync();
+
+                var result2 = await _db2.SalesOrdersHeads
+                    .Where(e => e.Type == "Sales Order")
+                    .GroupBy(e => e.CustomerId)
+                    .Select(g => new
+                    {
+                        CustomerId = g.Key,
+                        SalesMan = g.First().SalesMan,
+                        ordersCount = g.Count(e => e.Date < start)
+                    })
+                    .Where(e => e.ordersCount == 0 )
+                    .GroupBy(e => e.SalesMan)
+                    .Select(g => new
+                    {
+                        SalesMAn = g.Key,
+                        OrdersCount = g.Count()
+                    })
+                    .ToListAsync();
+
+
+
 
                 var resultFinal = JsonConvert.SerializeObject(result, Newtonsoft.Json.Formatting.Indented);
 
@@ -143,8 +235,6 @@ namespace EF_CORE_API.Controllers
                 return StatusCode(500, $"An unexpected error occurred : {ex.Message}");
             }
         }
-
-
 
 
 
@@ -314,6 +404,9 @@ namespace EF_CORE_API.Controllers
                 return Ok(end + 1);
             }
         }
+
+
+
 
 
         public async Task<List<DTOs.LinesItems>> PrepareLinesItems(DateTime start, DateTime end)

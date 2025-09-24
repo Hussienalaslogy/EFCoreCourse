@@ -63,7 +63,7 @@
             DGV1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             DGV1.Location = new Point(12, 14);
             DGV1.Name = "DGV1";
-            DGV1.Size = new Size(547, 175);
+            DGV1.Size = new Size(930, 175);
             DGV1.TabIndex = 0;
             // 
             // label1
@@ -128,7 +128,7 @@
             panel1.Controls.Add(DGV1);
             panel1.Location = new Point(12, 151);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1079, 636);
+            panel1.Size = new Size(1472, 636);
             panel1.TabIndex = 4;
             // 
             // label8
@@ -163,7 +163,7 @@
             DGV3.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             DGV3.Location = new Point(12, 426);
             DGV3.Name = "DGV3";
-            DGV3.Size = new Size(547, 175);
+            DGV3.Size = new Size(930, 175);
             DGV3.TabIndex = 2;
             // 
             // chart1
@@ -172,7 +172,7 @@
             chart1.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             chart1.Legends.Add(legend1);
-            chart1.Location = new Point(565, 14);
+            chart1.Location = new Point(948, 14);
             chart1.Name = "chart1";
             series1.ChartArea = "ChartArea1";
             series1.Legend = "Legend1";
@@ -187,7 +187,7 @@
             DGV2.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             DGV2.Location = new Point(12, 220);
             DGV2.Name = "DGV2";
-            DGV2.Size = new Size(547, 175);
+            DGV2.Size = new Size(930, 175);
             DGV2.TabIndex = 0;
             // 
             // groupBox1
@@ -250,7 +250,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1103, 796);
+            ClientSize = new Size(1496, 802);
             Controls.Add(groupBox1);
             Controls.Add(panel1);
             Controls.Add(totalOrderLbl);

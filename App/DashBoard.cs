@@ -13,6 +13,45 @@ using static App.DashBoard;
 
 namespace App
 {
+    public class SalesSummary
+    {
+        public string SalesMan { get; set; }
+        public int OrdersCount { get; set; }
+        public decimal OrdersAmount { get; set; }
+        public string TopOrderNo { get; set; }
+        public decimal TopOrderValue { get; set; }
+        public decimal NewCustomers { get; set; }
+
+    }
+
+    public class CustomerSummary
+    {
+        public string CustomerName { get; set; }
+        public string SalesMan { get; set; }
+        public int OrdersCount { get; set; }
+        public decimal OrdersAmount { get; set; }
+        public decimal TopOrderValue { get; set; }
+    }
+
+    public class CustomerTires
+    {
+        public string SalesMan { get; set; }
+
+        [DisplayName("Customers")]
+        public int CustomersCount { get; set; }
+
+        [DisplayName("<1K")]
+        public int Tier1 { get; set; }
+
+        [DisplayName("1K–9K")]
+        public int Tier2 { get; set; }
+
+        [DisplayName("10K–99K")]
+        public int Tier3 { get; set; }
+
+        [DisplayName("100K+")]
+        public int Tier4 { get; set; }
+    }
     public partial class DashBoard : Form
     {
         public DashBoard()
@@ -144,43 +183,7 @@ namespace App
             chart1.ChartAreas[0].RecalculateAxesScale();
         }
 
-        public class SalesSummary
-        {
-            public string SalesMan { get; set; }
-            public int OrdersCount { get; set; }
-            public decimal OrdersAmount { get; set; }
-            public string TopOrderNo { get; set; }
-            public decimal TopOrderValue { get; set; }
-        }
-
-        public class CustomerSummary
-        {
-            public string CustomerName { get; set; }
-            public string SalesMan { get; set; }
-            public int OrdersCount { get; set; }
-            public decimal OrdersAmount { get; set; }
-            public decimal TopOrderValue { get; set; }
-        }
-
-        public class CustomerTires
-        {
-            public string SalesMan { get; set; }
-
-            [DisplayName("Customers")]
-            public int CustomersCount { get; set; }
-
-            [DisplayName("<1K")]
-            public int Tier1 { get; set; }
-
-            [DisplayName("1K–9K")]
-            public int Tier2 { get; set; }
-
-            [DisplayName("10K–99K")]
-            public int Tier3 { get; set; }
-
-            [DisplayName("100K+")]
-            public int Tier4 { get; set; }
-        }
+       
 
 
 

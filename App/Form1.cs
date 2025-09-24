@@ -431,22 +431,15 @@ namespace App
 
         private async Task SendTemp()
         {
-            var adress = new
-            {
-                CustomerNo = "R00000002",
-                BuildingNo = "125",
-                Street = "Ibn Warqaa",
-                District = "Manfuha",
-                City = "Riyadh",
-                ZipCode = "18958"
-
-            };
-            string adressJson = JsonConvert.SerializeObject(adress);
+            var filePath = "D:\\Trash\\Test.json";
+            var order = File.ReadAllText(filePath);
+          
+            //string orderJson = JsonConvert.SerializeObject(order);
             
             string apiUrl = $"{Variables.APIHostSite}TempPost";
 
             using var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
-            request.Content = new StringContent(adressJson, Encoding.UTF8, "application/json");
+            request.Content = new StringContent(order, Encoding.UTF8, "application/json");
             using var response = await Variables.client.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
@@ -484,8 +477,8 @@ namespace App
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            //await SendTemp();
-            await GetTemp();
+            await SendTemp();
+            //await GetTemp();
         }
     }
 }
